@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bibliography</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <style>
+        body { margin: 20px; }
+        .table-row { cursor: pointer; }
+        .search-container { position: relative; margin-bottom: 10px; }
+        .clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #aaa;
+        }
+        .clear-btn:hover {
+            color: #000;
+        }
+        .details-section {
+            border-left: 1px solid #ddd;
+            padding-left: 20px;
+            position: sticky;
+            top: 20px; /* Keeps the details section at a fixed distance from the top */
+            max-height: calc(100vh - 40px);
+            overflow-y: auto; /* Allows scrolling within the details section */
+        }
+        .details-section h3 { margin-top: 0; }
+        .details-section p { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- Left Column: List -->
+            <div class="col-md-6">
+                <h2>Bibliography</h2>
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by title, author, or year...">
+                    <span class="clear-btn" id="clearSearch">&times;</span>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Year</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bibliographyTable">
+                        <!-- Dynamic Content -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Right Column: Details -->
+            <div class="col-md-6 details-section">
+                <div id="details">
+                    <h3 id="detailTitle">Select an entry to view details</h3>
+                    <p><strong>Author(s):</strong> <span id="detailAuthor"></span></p>
+                    <p><strong>Year:</strong> <span id="detailYear"></span></p>
+                    <p><strong>Publication:</strong> <span id="detailPublication"></span></p>
+                    <p><strong>ISBN:</strong> <span id="detailISBN"></span></p>
+                    <p><strong>ISSN:</strong> <span id="detailISSN"></span></p>
+                    <a id="detailLink" href="#" target="_blank">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let data = null;       // Original data
+        let filteredData = []; // Filtered data
+
+        // Load the data dynamically
+        $.getJSON('library_cleaned.json', function(response) {
+            data = response;
+            filteredData = [...data]; // Initially, filteredData is the same as data
+            renderTable(filteredData);
+        });
+
+        function renderTable(data) {
+            const table = $("#bibliographyTable");
+            table.empty();
+            data.forEach((item, index) => {
+                const row = $(`
+                    <tr class="table-row" data-index="${index}">
+                        <td>${item.Title}</td>
+                        <td>${item.Author}</td>
+                        <td>${item.PublicationYear || 'N/A'}</td>
+                    </tr>
+                `);
+                table.append(row);
+            });
+        }
+
+        // Search functionality
+        $("#searchInput").on("input", function() {
+            const query = $(this).val().toLowerCase();
+            filteredData = data.filter(item => 
+                item.Title.toLowerCase().includes(query) || 
+                item.Author.toLowerCase().includes(query) || 
+                (item.PublicationYear || '').toString().includes(query)
+            );
+            renderTable(filteredData);
+        });
+
+        // Clear search field
+        $("#clearSearch").on("click", function() {
+            $("#searchInput").val("").trigger("input");
+        });
+
+        // Detail view
+        $(document).on("click", ".table-row", function() {
+            const index = $(this).data("index");
+            const item = filteredData[index]; // Use filteredData instead of original data
+
+            $("#detailTitle").text(item.Title || "N/A");
+            $("#detailAuthor").text(item.Author || "N/A");
+            $("#detailYear").text(item.PublicationYear || "N/A");
+            $("#detailPublication").text(item.PublicationTitle || "N/A");
+            $("#detailISBN").text(item.ISBN || "N/A");
+            $("#detailISSN").text(item.ISSN || "N/A");
+            $("#detailLink").attr("href", item.Url || "#");
+        });
+    </script>
+</body>
+</html>
