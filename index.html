@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,12 +26,18 @@
             border-left: 1px solid #ddd;
             padding-left: 20px;
             position: sticky;
-            top: 20px; /* Keeps the details section at a fixed distance from the top */
+            top: 20px;
             max-height: calc(100vh - 40px);
-            overflow-y: auto; /* Allows scrolling within the details section */
+            overflow-y: auto;
         }
         .details-section h3 { margin-top: 0; }
         .details-section p { margin: 5px 0; }
+        .details-section pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
@@ -42,15 +47,15 @@
             <div class="col-md-6">
                 <h2>Bibliography</h2>
                 <div class="search-container">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search by title, author, or year...">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search...">
                     <span class="clear-btn" id="clearSearch">&times;</span>
                 </div>
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>Key</th>
                             <th>Title</th>
                             <th>Author</th>
-                            <th>Year</th>
                         </tr>
                     </thead>
                     <tbody id="bibliographyTable">
@@ -63,12 +68,7 @@
             <div class="col-md-6 details-section">
                 <div id="details">
                     <h3 id="detailTitle">Select an entry to view details</h3>
-                    <p><strong>Author(s):</strong> <span id="detailAuthor"></span></p>
-                    <p><strong>Year:</strong> <span id="detailYear"></span></p>
-                    <p><strong>Publication:</strong> <span id="detailPublication"></span></p>
-                    <p><strong>ISBN:</strong> <span id="detailISBN"></span></p>
-                    <p><strong>ISSN:</strong> <span id="detailISSN"></span></p>
-                    <a id="detailLink" href="#" target="_blank">Read More</a>
+                    <pre id="detailContent">Details will appear here...</pre>
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
         let filteredData = []; // Filtered data
 
         // Load the data dynamically
-        $.getJSON('library_cleaned.json', function(response) {
+        $.getJSON('library_full_data.json', function(response) {
             data = response;
             filteredData = [...data]; // Initially, filteredData is the same as data
             renderTable(filteredData);
@@ -91,9 +91,9 @@
             data.forEach((item, index) => {
                 const row = $(`
                     <tr class="table-row" data-index="${index}">
-                        <td>${item.Title}</td>
-                        <td>${item.Author}</td>
-                        <td>${item.PublicationYear || 'N/A'}</td>
+                        <td>${item.Key || 'N/A'}</td>
+                        <td>${item.Title || 'N/A'}</td>
+                        <td>${item.Author || 'N/A'}</td>
                     </tr>
                 `);
                 table.append(row);
@@ -104,9 +104,9 @@
         $("#searchInput").on("input", function() {
             const query = $(this).val().toLowerCase();
             filteredData = data.filter(item => 
-                item.Title.toLowerCase().includes(query) || 
-                item.Author.toLowerCase().includes(query) || 
-                (item.PublicationYear || '').toString().includes(query)
+                Object.values(item).some(val =>
+                    (val || '').toString().toLowerCase().includes(query)
+                )
             );
             renderTable(filteredData);
         });
@@ -120,14 +120,7 @@
         $(document).on("click", ".table-row", function() {
             const index = $(this).data("index");
             const item = filteredData[index]; // Use filteredData instead of original data
-
-            $("#detailTitle").text(item.Title || "N/A");
-            $("#detailAuthor").text(item.Author || "N/A");
-            $("#detailYear").text(item.PublicationYear || "N/A");
-            $("#detailPublication").text(item.PublicationTitle || "N/A");
-            $("#detailISBN").text(item.ISBN || "N/A");
-            $("#detailISSN").text(item.ISSN || "N/A");
-            $("#detailLink").attr("href", item.Url || "#");
+            $("#detailContent").text(JSON.stringify(item, null, 2)); // Show all details
         });
     </script>
 </body>
