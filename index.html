@@ -34,9 +34,10 @@
             display: flex;
             justify-content: center;
             margin-top: 10px;
+            flex-wrap: wrap;
         }
         .pagination button {
-            margin: 0 5px;
+            margin: 0 2px;
             padding: 5px 10px;
             border: 1px solid #ddd;
             background-color: #fff;
@@ -133,6 +134,11 @@
             pagination.empty();
 
             const totalPages = Math.ceil(data.length / rowsPerPage);
+            const visiblePages = 5; // Number of pages to show at once
+            const halfVisible = Math.floor(visiblePages / 2);
+
+            const startPage = Math.max(1, currentPage - halfVisible);
+            const endPage = Math.min(totalPages, startPage + visiblePages - 1);
 
             // Previous button
             const prevButton = $(`<button ${currentPage === 1 ? 'class="disabled"' : ''}>Previous</button>`);
@@ -146,7 +152,7 @@
             pagination.append(prevButton);
 
             // Page buttons
-            for (let i = 1; i <= totalPages; i++) {
+            for (let i = startPage; i <= endPage; i++) {
                 const pageButton = $(`<button ${i === currentPage ? 'class="active"' : ''}>${i}</button>`);
                 pageButton.on("click", () => {
                     currentPage = i;
@@ -154,6 +160,16 @@
                     renderPagination(filteredData);
                 });
                 pagination.append(pageButton);
+            }
+
+            // Ellipsis for pages before
+            if (startPage > 1) {
+                pagination.prepend($('<button class="disabled">...</button>'));
+            }
+
+            // Ellipsis for pages after
+            if (endPage < totalPages) {
+                pagination.append($('<button class="disabled">...</button>'));
             }
 
             // Next button
