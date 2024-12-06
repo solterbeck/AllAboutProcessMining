@@ -122,7 +122,7 @@
         function renderDetails(item) {
             const detailContent = $("#detailContent");
             detailContent.empty();
-
+        
             const formattedDetails = `
                 <div class="detail-item"><label>Title:</label> <div>${item.Title || 'N/A'}</div></div>
                 <div class="detail-item"><label>Author(s):</label> <div>${item.Author || 'N/A'}</div></div>
@@ -133,14 +133,15 @@
                     <div>${item.Publisher || '-'} / ${item.PublicationYear || '-'} / ${item.Pages || '-'} / ${item.Language || 'N/A'}</div>
                 </div>
                 <div class="detail-item"><label>Tags:</label> <div>${item.ManualTags || 'N/A'}</div></div>
-                <div class="detail-item"><label>Abstract:</label> <div>${item.Abstract || 'N/A'}</div></div>
+                <div class="detail-item"><label>Abstract:</label> <div>${item.AbstractNote || 'N/A'}</div></div>
                 <div class="detail-item"><label>Source:</label> 
                     <div><a href="${item.Url || '#'}" target="_blank">Download or link to the source</a></div>
                 </div>
             `;
-
+        
             detailContent.html(formattedDetails);
         }
+
 
         // Detail view
         $(document).on("click", ".table-row", function() {
