@@ -68,7 +68,9 @@
             <div class="col-md-6 details-section">
                 <div id="details">
                     <h3 id="detailTitle">Select an entry to view details</h3>
-                    <div id="detailContent"></div>
+                    <div id="detailContent">
+                        <!-- Formatted details will be displayed here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,21 +118,28 @@
             $("#searchInput").val("").trigger("input");
         });
 
-        // Render the details in a form-like view
+        // Render the details in a form-like view with structure
         function renderDetails(item) {
             const detailContent = $("#detailContent");
             detailContent.empty();
 
-            Object.keys(item).forEach(key => {
-                const value = item[key] || 'N/A';
-                const detailItem = $(`
-                    <div class="detail-item">
-                        <label>${key}:</label>
-                        <div>${value}</div>
-                    </div>
-                `);
-                detailContent.append(detailItem);
-            });
+            const formattedDetails = `
+                <div class="detail-item"><label>Title:</label> <div>${item.Title || 'N/A'}</div></div>
+                <div class="detail-item"><label>Author(s):</label> <div>${item.Author || 'N/A'}</div></div>
+                <div class="detail-item"><label>Editor(s):</label> <div>${item.Editor || 'N/A'}</div></div>
+                <div class="detail-item"><label>Item Type:</label> <div>${item.ItemType || 'N/A'}</div></div>
+                <div class="detail-item"><label>Publication Title:</label> <div>${item.PublicationTitle || 'N/A'}</div></div>
+                <div class="detail-item"><label>Publisher / Year / Pages / Language:</label> 
+                    <div>${item.Publisher || '-'} / ${item.PublicationYear || '-'} / ${item.Pages || '-'} / ${item.Language || 'N/A'}</div>
+                </div>
+                <div class="detail-item"><label>Tags:</label> <div>${item.ManualTags || 'N/A'}</div></div>
+                <div class="detail-item"><label>Abstract:</label> <div>${item.Abstract || 'N/A'}</div></div>
+                <div class="detail-item"><label>Source:</label> 
+                    <div><a href="${item.Url || '#'}" target="_blank">Download or link to the source</a></div>
+                </div>
+            `;
+
+            detailContent.html(formattedDetails);
         }
 
         // Detail view
