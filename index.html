@@ -32,11 +32,11 @@
         }
         .details-section h3 { margin-top: 0; }
         .details-section p { margin: 5px 0; }
-        .details-section pre {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            overflow-x: auto;
+        .details-section .detail-item {
+            margin-bottom: 10px;
+        }
+        .details-section .detail-item label {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -68,7 +68,7 @@
             <div class="col-md-6 details-section">
                 <div id="details">
                     <h3 id="detailTitle">Select an entry to view details</h3>
-                    <pre id="detailContent">Details will appear here...</pre>
+                    <div id="detailContent"></div>
                 </div>
             </div>
         </div>
@@ -116,11 +116,28 @@
             $("#searchInput").val("").trigger("input");
         });
 
+        // Render the details in a form-like view
+        function renderDetails(item) {
+            const detailContent = $("#detailContent");
+            detailContent.empty();
+
+            Object.keys(item).forEach(key => {
+                const value = item[key] || 'N/A';
+                const detailItem = $(`
+                    <div class="detail-item">
+                        <label>${key}:</label>
+                        <div>${value}</div>
+                    </div>
+                `);
+                detailContent.append(detailItem);
+            });
+        }
+
         // Detail view
         $(document).on("click", ".table-row", function() {
             const index = $(this).data("index");
             const item = filteredData[index]; // Use filteredData instead of original data
-            $("#detailContent").text(JSON.stringify(item, null, 2)); // Show all details
+            renderDetails(item);
         });
     </script>
 </body>
