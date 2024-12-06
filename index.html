@@ -216,6 +216,13 @@
             const formattedDetails = `
                 <div class="detail-item"><label>Title:</label> <div>${item.Title || 'N/A'}</div></div>
                 <div class="detail-item"><label>Author(s):</label> <div>${item.Author || 'N/A'}</div></div>
+                <div class="detail-item"><label>Editor(s):</label> <div>${item.Editor || 'N/A'}</div></div>
+                <div class="detail-item"><label>Item Type:</label> <div>${item.ItemType || 'N/A'}</div></div>
+                <div class="detail-item"><label>Publication Title:</label> <div>${item.PublicationTitle || 'N/A'}</div></div>
+                <div class="detail-item"><label>Publisher / Year / Pages / Language:</label> 
+                    <div>${item.Publisher || '-'} / ${item.PublicationYear || '-'} / ${item.Pages || '-'} / ${item.Language || 'N/A'}</div>
+                </div>
+                <div class="detail-item"><label>Tags:</label> <div>${item.ManualTags || 'N/A'}</div></div>
                 <div class="detail-item"><label>Abstract:</label> <div>${item.AbstractNote || 'N/A'}</div></div>
                 <div class="detail-item"><label>Source:</label> 
                     <div><a href="${item.Url || '#'}" target="_blank">Download or link to the source</a></div>
