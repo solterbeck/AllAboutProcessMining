@@ -188,9 +188,21 @@
         $("#searchInput").on("input", function() {
             const query = $(this).val().toLowerCase();
             filteredData = data.filter(item => 
-                Object.values(item).some(val =>
-                    (val || '').toString().toLowerCase().includes(query)
-                ) || (item.ManualTags || '').toLowerCase().includes(query)
+                [
+                    item.Title,
+                    item.Author,
+                    item.Editor,
+                    item.ItemType,
+                    item.PublicationTitle,
+                    item.Publisher,
+                    item.PublicationYear,
+                    item.Pages,
+                    item.Language,
+                    item.ManualTags,
+                    item.AbstractNote,
+                    item.Url
+                ]
+                .some(val => (val || '').toString().toLowerCase().includes(query))
             );
             currentPage = 1; // Reset to first page after search
             renderTable(filteredData);
