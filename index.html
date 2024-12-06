@@ -30,13 +30,25 @@
             max-height: calc(100vh - 40px);
             overflow-y: auto;
         }
-        .details-section h3 { margin-top: 0; }
-        .details-section p { margin: 5px 0; }
-        .details-section .detail-item {
-            margin-bottom: 10px;
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
         }
-        .details-section .detail-item label {
-            font-weight: bold;
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .pagination button.active {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .pagination button.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
         }
     </style>
 </head>
@@ -62,6 +74,9 @@
                         <!-- Dynamic Content -->
                     </tbody>
                 </table>
+                <div class="pagination" id="pagination">
+                    <!-- Pagination buttons will be added here -->
+                </div>
             </div>
 
             <!-- Right Column: Details -->
@@ -69,8 +84,8 @@
                 <div id="details">
                     <h3 id="detailTitle">Select an entry to view details</h3>
                     <div id="detailContent">
-                        <pre id="detailContent">Details will appear here...</pre>
                         <!-- Formatted details will be displayed here -->
+                        <pre id="detailContent">Details will appear here...</pre>
                     </div>
                 </div>
             </div>
@@ -80,27 +95,77 @@
     <script>
         let data = null;       // Original data
         let filteredData = []; // Filtered data
+        const rowsPerPage = 5; // Number of rows per page
+        let currentPage = 1;
 
         // Load the data dynamically
         $.getJSON('library_full_data.json', function(response) {
             data = response;
             filteredData = [...data]; // Initially, filteredData is the same as data
             renderTable(filteredData);
+            renderPagination(filteredData);
         });
 
         function renderTable(data) {
             const table = $("#bibliographyTable");
             table.empty();
-            data.forEach((item, index) => {
+
+            // Calculate start and end indices for current page
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = Math.min(start + rowsPerPage, data.length);
+
+            // Render only rows for the current page
+            for (let i = start; i < end; i++) {
+                const item = data[i];
                 const row = $(`
-                    <tr class="table-row" data-index="${index}">
+                    <tr class="table-row" data-index="${i}">
                         <td>${item.PublicationYear || 'N/A'}</td>
                         <td>${item.Title || 'N/A'}</td>
                         <td>${item.Author || 'N/A'}</td>
                     </tr>
                 `);
                 table.append(row);
+            }
+        }
+
+        function renderPagination(data) {
+            const pagination = $("#pagination");
+            pagination.empty();
+
+            const totalPages = Math.ceil(data.length / rowsPerPage);
+
+            // Previous button
+            const prevButton = $(`<button ${currentPage === 1 ? 'class="disabled"' : ''}>Previous</button>`);
+            prevButton.on("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable(filteredData);
+                    renderPagination(filteredData);
+                }
             });
+            pagination.append(prevButton);
+
+            // Page buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = $(`<button ${i === currentPage ? 'class="active"' : ''}>${i}</button>`);
+                pageButton.on("click", () => {
+                    currentPage = i;
+                    renderTable(filteredData);
+                    renderPagination(filteredData);
+                });
+                pagination.append(pageButton);
+            }
+
+            // Next button
+            const nextButton = $(`<button ${currentPage === totalPages ? 'class="disabled"' : ''}>Next</button>`);
+            nextButton.on("click", () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable(filteredData);
+                    renderPagination(filteredData);
+                }
+            });
+            pagination.append(nextButton);
         }
 
         // Search functionality
@@ -111,7 +176,9 @@
                     (val || '').toString().toLowerCase().includes(query)
                 ) || (item.ManualTags || '').toLowerCase().includes(query)
             );
+            currentPage = 1; // Reset to first page after search
             renderTable(filteredData);
+            renderPagination(filteredData);
         });
 
         // Clear search field
@@ -119,37 +186,28 @@
             $("#searchInput").val("").trigger("input");
         });
 
-        // Render the details in a form-like view with structure
-        function renderDetails(item) {
-            const detailContent = $("#detailContent");
-            detailContent.empty();
-        
-            const formattedDetails = `
-                <div class="detail-item"><label>Title:</label> <div>${item.Title || 'N/A'}</div></div>
-                <div class="detail-item"><label>Author(s):</label> <div>${item.Author || 'N/A'}</div></div>
-                <div class="detail-item"><label>Editor(s):</label> <div>${item.Editor || 'N/A'}</div></div>
-                <div class="detail-item"><label>Item Type:</label> <div>${item.ItemType || 'N/A'}</div></div>
-                <div class="detail-item"><label>Publication Title:</label> <div>${item.PublicationTitle || 'N/A'}</div></div>
-                <div class="detail-item"><label>Publisher / Year / Pages / Language:</label> 
-                    <div>${item.Publisher || '-'} / ${item.PublicationYear || '-'} / ${item.Pages || '-'} / ${item.Language || 'N/A'}</div>
-                </div>
-                <div class="detail-item"><label>Tags:</label> <div>${item.ManualTags || 'N/A'}</div></div>
-                <div class="detail-item"><label>Abstract:</label> <div>${item.AbstractNote || 'N/A'}</div></div>
-                <div class="detail-item"><label>Source:</label> 
-                    <div><a href="${item.Url || '#'}" target="_blank">Download or link to the source</a></div>
-                </div>
-            `;
-        
-            detailContent.html(formattedDetails);
-        }
-
-
         // Detail view
         $(document).on("click", ".table-row", function() {
             const index = $(this).data("index");
             const item = filteredData[index]; // Use filteredData instead of original data
             renderDetails(item);
         });
+
+        function renderDetails(item) {
+            const detailContent = $("#detailContent");
+            detailContent.empty();
+
+            const formattedDetails = `
+                <div class="detail-item"><label>Title:</label> <div>${item.Title || 'N/A'}</div></div>
+                <div class="detail-item"><label>Author(s):</label> <div>${item.Author || 'N/A'}</div></div>
+                <div class="detail-item"><label>Abstract:</label> <div>${item.AbstractNote || 'N/A'}</div></div>
+                <div class="detail-item"><label>Source:</label> 
+                    <div><a href="${item.Url || '#'}" target="_blank">Download or link to the source</a></div>
+                </div>
+            `;
+
+            detailContent.html(formattedDetails);
+        }
     </script>
 </body>
 </html>
