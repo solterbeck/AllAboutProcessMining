@@ -209,7 +209,59 @@
             renderDetails(item);
         });
 
-    	
+        function renderDetails(item) {
+            const detailContent = $("#detailContent");
+            detailContent.empty();
+
+            const formattedDetails = `
+                <div class="detail-item">
+                    <label><b>Title:</b></label>
+                    <div>${item.Title || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Author(s):</b></label>
+                    <div>${item.Author || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Editor(s):</b></label>
+                    <div>${item.Editor || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Item Type:</b></label>
+                    <div>${item.ItemType || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Publication Title:</b></label>
+                    <div>${item.PublicationTitle || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Publisher / Year / Pages / Language:</b></label>
+                    <div>
+                        ${item.Publisher || '-'} / 
+                        ${item.PublicationYear || '-'} / 
+                        ${item.Pages || '-'} / 
+                        ${item.Language || 'N/A'}
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Tags:</b></label>
+                    <div>${item.ManualTags || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Abstract:</b></label>
+                    <div>${item.AbstractNote || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <label><b>Source:</b></label>
+                    <div>
+                        <a href="${item.Url || '#'}" target="_blank">Download or link to the source</a>
+                    </div>
+                </div>
+            `;
+
+            detailContent.html(formattedDetails);
+        }
     </script>
 </body>
 </html>
+
