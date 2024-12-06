@@ -68,13 +68,7 @@
             <div class="col-md-6 details-section">
                 <div id="details">
                     <h3 id="detailTitle">Select an entry to view details</h3>
-                    <p><strong>Author(s):</strong> <span id="detailAuthor"></span></p>
-                    <p><strong>Year:</strong> <span id="detailYear"></span></p>
-                    <p><strong>Publication:</strong> <span id="detailPublication"></span></p>
-                    <p><strong>ISBN:</strong> <span id="detailISBN"></span></p>
-                    <p><strong>ISSN:</strong> <span id="detailISSN"></span></p>
-                    <p><strong>Manual Tag:</strong> <span id="detailManualTag"></span></p>
-                    <a id="detailLink" href="#" target="_blank">Read More</a>
+                    <pre id="detailContent">Details will appear here...</pre>
                 </div>
             </div>
         </div>
@@ -112,7 +106,7 @@
             filteredData = data.filter(item => 
                 Object.values(item).some(val =>
                     (val || '').toString().toLowerCase().includes(query)
-                )
+                ) || (item.ManualTags || '').toLowerCase().includes(query)
             );
             renderTable(filteredData);
         });
@@ -126,15 +120,7 @@
         $(document).on("click", ".table-row", function() {
             const index = $(this).data("index");
             const item = filteredData[index]; // Use filteredData instead of original data
-
-            $("#detailTitle").text(item.Title || "N/A");
-            $("#detailAuthor").text(item.Author || "N/A");
-            $("#detailYear").text(item.PublicationYear || "N/A");
-            $("#detailPublication").text(item.PublicationTitle || "N/A");
-            $("#detailISBN").text(item.ISBN || "N/A");
-            $("#detailISSN").text(item.ISSN || "N/A");
-            $("#detailManualTag").text(item.ManualTag || "N/A"); // Display ManualTag
-            $("#detailLink").attr("href", item.Url || "#");
+            $("#detailContent").text(JSON.stringify(item, null, 2)); // Show all details
         });
     </script>
 </body>
